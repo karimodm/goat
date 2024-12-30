@@ -9,6 +9,10 @@
             "path": "./typescript"
         },
         {
+            "name": "🐍 Python",
+            "path": "./python"
+        },
+        {
             "name": "🌋 Core",
             "path": "./typescript/packages/core"
         },

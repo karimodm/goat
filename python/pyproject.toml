@@ -8,17 +8,17 @@ keywords = ["goat", "sdk", "web3", "agents", "ai"]
 homepage = "https://ohmygoat.dev/"
 repository = "https://github.com/goat-sdk/goat"
 packages = [
-    { include = "goat_sdk" },
+    { include = "core", from = "src" },
 ]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-solders = "^0.23.0"
-web3 = "^7.6.0"
+zon = "^2.0.1"
+pydantic = "^2.10.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
-pytest-asyncio = "^0.24.0"
+pytest-asyncio = "^0.25.0"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/goat-sdk/goat/issues"
@@ -33,3 +33,10 @@ asyncio_default_fixture_loop_scope = "function"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8.4"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"

@@ -9,8 +9,8 @@ def test_create_tool():
         "count": ZonNumber()
     })
 
-    parameters.shape["message"].description = "A test message"
-    parameters.shape["count"].description = "Number of times to repeat"
+    parameters.shape["message"].description = "A test message" # type: ignore
+    parameters.shape["count"].description = "Number of times to repeat" # type: ignore
     
     # Create tool configuration
     config = ToolConfig(
@@ -64,7 +64,7 @@ def test_create_tool_async():
         "delay": ZonNumber()
     })
 
-    parameters.shape["delay"].description = "Delay in seconds"
+    parameters.shape["delay"].description = "Delay in seconds" # type: ignore
     
     # Create tool configuration
     config = ToolConfig(

@@ -10,6 +10,5 @@ __all__ = [
     "add_parameters_to_description",
     "create_tool_parameters",
     "ToolParametersStatic",
-    # "get_tools",
     "snake_case",
 ]

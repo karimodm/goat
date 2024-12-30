@@ -1,15 +1,85 @@
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, Type, Union, TypedDict
+from typing import Any, Dict, Optional, Type, Callable
 import inspect
-from core.decorators.tool import StoredToolMetadata
+from typing_extensions import TypedDict
 from zon import ZonRecord
 
-from core.classes import WalletClientBase
+from core.classes.wallet_client_base import WalletClientBase
 from core.utils.snake_case import snake_case
+
+@dataclass
+class ToolDecoratorParams:
+    description: str
+    name: Optional[str] = None
+
+class ParameterMetadata(TypedDict):
+    index: int
+    schema: ZonRecord
+
+class WalletClientMetadata(TypedDict):
+    index: int
+
+@dataclass 
+class StoredToolMetadata:
+    name: str
+    description: str
+    parameters: ParameterMetadata
+    target: Callable
+    wallet_client: Optional[WalletClientMetadata] = None
 
 # Store tool metadata at module level
 _tool_metadata: Dict[Type, Dict[str, StoredToolMetadata]] = {}
+
+def Tool(params: ToolDecoratorParams):
+    """
+    Decorator that marks a class method as a tool accessible to the LLM.
+    
+    Args:
+        params: Configuration parameters for the tool
+        
+    Returns:
+        Decorated method
+        
+    Example:
+        class MyToolService:
+            @Tool(description="Adds two numbers")
+            def add(self, params: AddParameters):
+                return params.a + params.b
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*wrapper_args, **kwargs):
+            return func(*wrapper_args, **kwargs)
+
+        # Get the class from the first argument when method is called
+        def register_tool(*args, **kwargs):
+            if not args:
+                raise ValueError("Tool decorator can only be used on class methods")
+            
+            target_class = args[0].__class__
+            
+            # Validate parameters and get metadata
+            validated = validate_method_parameters(target_class, func.__name__)
+            
+            # Create tool metadata
+            metadata = StoredToolMetadata(
+                name=params.name or snake_case(func.__name__),
+                description=params.description,
+                parameters=validated['parameters'],
+                wallet_client=validated.get('wallet_client'),
+                target=func
+            )
+
+            # Store metadata
+            if target_class not in _tool_metadata:
+                _tool_metadata[target_class] = {}
+            _tool_metadata[target_class][func.__name__] = metadata
+
+            return wrapper(*args, **kwargs)
+
+        return register_tool
+    return decorator
 
 def validate_method_parameters(target: Any, method_name: str) -> dict:
     """
@@ -42,7 +112,8 @@ def validate_method_parameters(target: Any, method_name: str) -> dict:
     wallet_client_param = None
     
     for idx, param in enumerate(params):
-        if hasattr(param.annotation, 'schema') and isinstance(param.annotation.schema, ZonSchema):
+        if (hasattr(param.annotation, 'schema') and 
+            isinstance(param.annotation.schema, ZonRecord)):
             parameters_param = {'index': idx, 'schema': param.annotation.schema}
         elif (isinstance(param.annotation, type) and 
               issubclass(param.annotation, WalletClientBase)):
@@ -60,54 +131,3 @@ def validate_method_parameters(target: Any, method_name: str) -> dict:
         result['wallet_client'] = wallet_client_param
 
     return result
-
-def Tool(params: ToolDecoratorParams):
-    """
-    Decorator that marks a class method as a tool accessible to the LLM.
-    
-    Args:
-        params: Configuration parameters for the tool
-        
-    Returns:
-        Decorated method
-        
-    Example:
-        class MyToolService:
-            @Tool(description="Adds two numbers")
-            def add(self, params: AddParameters):
-                return params.a + params.b
-    """
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-
-        # Get the class from the first argument (self)
-        if not args:
-            raise ValueError("Tool decorator can only be used on class methods")
-        
-        target_class = args[0].__class__
-        
-        # Validate parameters and get metadata
-        validated = validate_method_parameters(target_class, func.__name__)
-        
-        # Create tool metadata
-        metadata = StoredToolMetadata(
-            name=params.name or snake_case(func.__name__),
-            description=params.description,
-            parameters=validated['parameters'],
-            wallet_client=validated.get('wallet_client'),
-            target=func
-        )
-
-        # Store metadata
-        if target_class not in _tool_metadata:
-            _tool_metadata[target_class] = {}
-        _tool_metadata[target_class][func.__name__] = metadata
-
-        return wrapper
-    return decorator
-
-def get_tool_metadata(cls: Type) -> Dict[str, StoredToolMetadata]:
-    """Get all tool metadata for a class"""
-    return _tool_metadata.get(cls, {})

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, TypedDict
 from zon import ZonRecord, ZonString
 
-from core.classes.tool_base import ToolBase, create_tool, ToolConfig
+from core.classes.tool_base import ToolBase, create_tool
 from core.types.chain import Chain
 from core.utils.create_tool_parameters import create_tool_parameters
 
@@ -47,7 +47,7 @@ class WalletClientBase(ABC):
                 {
                     "name": "get_address",
                     "description": "Get the address of the wallet",
-                    "parameters": EmptyParams.schema,
+                    "parameters": EmptyParams.schema, # type: ignore
                 },
                 lambda _: self.get_address()
             ),
@@ -55,7 +55,7 @@ class WalletClientBase(ABC):
                 {
                     "name": "get_chain",
                     "description": "Get the chain of the wallet",
-                    "parameters": EmptyParams.schema,
+                    "parameters": EmptyParams.schema, # type: ignore
                 },
                 lambda _: self.get_chain()
             ),
@@ -63,7 +63,7 @@ class WalletClientBase(ABC):
                 {
                     "name": "get_balance",
                     "description": "Get the balance of the wallet",
-                    "parameters": BalanceParams.schema,
+                    "parameters": BalanceParams.schema, # type: ignore
                 },
                 lambda parameters: self.balance_of(parameters["address"])
             )

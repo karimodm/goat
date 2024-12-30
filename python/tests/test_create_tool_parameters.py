@@ -6,7 +6,7 @@ from core.utils.create_tool_parameters import create_tool_parameters
 def test_create_token_parameters():
     # Test GetTokenInfoBySymbol
     symbol_param = ZonString()
-    symbol_param.description = "The symbol of the token to get the info of"
+    symbol_param.description = "The symbol of the token to get the info of" # type: ignore
     GetTokenInfoBySymbolParameters = create_tool_parameters(
         ZonRecord({
             "symbol": symbol_param
@@ -15,9 +15,9 @@ def test_create_token_parameters():
     
     # Test GetTokenBalance
     wallet_param = ZonString()
-    wallet_param.description = "The wallet to get the balance of"
+    wallet_param.description = "The wallet to get the balance of" # type: ignore
     token_address_param = ZonString()
-    token_address_param.description = "The token address to get the balance of"
+    token_address_param.description = "The token address to get the balance of" # type: ignore
     
     GetTokenBalanceParameters = create_tool_parameters(
         ZonRecord({
@@ -27,12 +27,12 @@ def test_create_token_parameters():
     )
 
     # Verify the schemas are accessible
-    assert "symbol" in GetTokenInfoBySymbolParameters.schema.shape
-    assert "wallet" in GetTokenBalanceParameters.schema.shape
-    assert "tokenAddress" in GetTokenBalanceParameters.schema.shape
+    assert "symbol" in GetTokenInfoBySymbolParameters.schema.shape # type: ignore
+    assert "wallet" in GetTokenBalanceParameters.schema.shape # type: ignore
+    assert "tokenAddress" in GetTokenBalanceParameters.schema.shape # type: ignore
 
     # Test schema validation
-    token_info_schema = GetTokenInfoBySymbolParameters.schema
+    token_info_schema = GetTokenInfoBySymbolParameters.schema # type: ignore
     assert token_info_schema.validate({"symbol": "ETH"})
 
     # This should raise a validation error

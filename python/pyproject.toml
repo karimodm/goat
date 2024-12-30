@@ -12,7 +12,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.12"
 solders = "^0.23.0"
 web3 = "^7.6.0"
 

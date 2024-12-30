@@ -33,7 +33,6 @@ llm = langchain_openai.ChatOpenAI({
 })
 
 async def main():
-    import ipdb; ipdb.set_trace()
     # Get prompt template
     prompt = langchain_hub.pull(
         'hwchase17/structured-chat-agent'

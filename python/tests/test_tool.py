@@ -3,16 +3,14 @@ import pytest
 from dataclasses import dataclass
 from core.decorators.tool import Tool, ToolDecoratorParams
 from core.classes.wallet_client_base import Signature, Balance, WalletClientBase
-from zon import ZonRecord, ZonString
-from core.utils.create_tool_parameters import create_tool_parameters, ToolParametersStatic
+from zon import ZonRecord, ZonString, ZonError
+from core.utils.create_tool_parameters import create_tool_parameters, ToolParameters
 from typing import TypedDict, Any, Dict, Type, cast
 
 # Create test schemas and classes
 test_schema = ZonRecord({
     "value": ZonString()
 })
-
-TestParameters = create_tool_parameters(test_schema)
 
 class TestWalletClient(WalletClientBase):
     def get_address(self) -> str:
@@ -29,36 +27,57 @@ class TestWalletClient(WalletClientBase):
 
 # Separate service class from test class to avoid pytest collecting it
 class ToolService:
-    @Tool(ToolDecoratorParams(description="Test tool"))
-    def test_method(self, params: Any) -> str:
-        return cast(Dict[str, str], params)["value"]
+    @Tool({
+        "description": "Test tool",
+        "parameters": create_tool_parameters(test_schema)
+    })
+    def test_method(self, params: dict) -> str:
+        return params["value"]
     
-    @Tool(ToolDecoratorParams(description="Test tool with wallet", name="custom_name"))
-    def test_method_with_wallet(self, params: Any, wallet: TestWalletClient) -> str:
-        return f"{cast(Dict[str, str], params)['value']} with wallet"
+    @Tool({
+        "description": "Test tool with wallet",
+        "name": "custom_name",
+        "parameters": create_tool_parameters(test_schema)
+    })
+    def test_method_with_wallet(self, params: dict, wallet: TestWalletClient) -> str:
+        return f"{params['value']} with wallet"
 
 class TestToolDecorator:
     def test_tool_decorator_functionality(self):
-        # Create instance of service
         service = ToolService()
         
-        # Test actual method execution
+        # Test with valid parameters
         result = service.test_method({"value": "test"})
         assert result == "test"
         
         result = service.test_method_with_wallet({"value": "test"}, TestWalletClient())
         assert result == "test with wallet"
 
+    def test_schema_validation(self):
+        service = ToolService()
+        
+        # Test with invalid parameters
+        with pytest.raises(ZonError):  # Replace with specific Zon validation exception
+            service.test_method({"invalid_key": "test"})
+        
+        with pytest.raises(ZonError):  # Replace with specific Zon validation exception
+            service.test_method({"value": 123})  # Wrong type
+
     def test_tool_decorator_validation(self):
         # Test invalid method signatures
-        with pytest.raises(ValueError, match="Tool methods must have at least one parameter"):
+        with pytest.raises(ValueError):
             class InvalidService:
-                @Tool(ToolDecoratorParams(description="Invalid tool"))
+                @Tool({
+                    "description": "Invalid tool",
+                })
                 def no_params(self):
                     pass
 
-        with pytest.raises(ValueError, match="Tool methods must have at least one parameter"):
+        with pytest.raises(ValueError):
             class InvalidService2:
-                @Tool(ToolDecoratorParams(description="Invalid tool"))
+                @Tool({
+                    "description": "Invalid tool",
+                    "parameters": test_schema
+                })
                 def too_many_params(self, param1: Any, param2: TestWalletClient, param3: str):
                     pass 

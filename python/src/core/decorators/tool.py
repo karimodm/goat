@@ -1,17 +1,19 @@
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Dict, Optional, Type, Callable
+from pyclbr import Class
+from typing import Any, Dict, Optional, Type, Callable, NotRequired, ClassVar
 import inspect
+from core.utils.create_tool_parameters import ToolParameters
 from typing_extensions import TypedDict
 from zon import ZonRecord
 
 from core.classes.wallet_client_base import WalletClientBase
 from core.utils.snake_case import snake_case
 
-@dataclass
-class ToolDecoratorParams:
+class ToolDecoratorParams(TypedDict):
+    name: NotRequired[str]
     description: str
-    name: Optional[str] = None
+    parameters: ToolParameters
 
 class ParameterMetadata(TypedDict):
     index: int
@@ -28,83 +30,96 @@ class StoredToolMetadata:
     target: Callable
     wallet_client: Optional[WalletClientMetadata] = None
 
-# Store tool metadata at module level
-_tool_metadata: Dict[Type, Dict[str, StoredToolMetadata]] = {}
+TOOL_METADATA_KEY = "__goat_tool__"
 
-def Tool(params: ToolDecoratorParams):
+def Tool(tool_params: ToolDecoratorParams) -> Any:
     """
     Decorator that marks a class method as a tool accessible to the LLM.
     
+    The decorator accepts configuration parameters and an optional schema for runtime parameter validation.
+    When a schema is provided, all parameters passed to the tool will be validated against it before
+    execution.
+
     Args:
-        params: Configuration parameters for the tool
-        
+        params: Either a ToolDecoratorParams instance or a dict containing:
+            - description (str): A description of what the tool does
+            - name (str, optional): Custom name for the tool. Defaults to the method name in snake_case
+            - parameters (ZonRecord, optional): A Zon schema to validate parameters at runtime
+    
     Returns:
-        Decorated method
-        
+        A decorated method that includes parameter validation and tool metadata
+
     Example:
-        class MyToolService:
-            @Tool(description="Adds two numbers")
-            def add(self, params: AddParameters):
-                return params.a + params.b
+        ```python
+        class MyService:
+            @Tool(ToolDecoratorParams(
+                description="Adds two numbers",
+                schema=ZonRecord({"a": ZonNumber(), "b": ZonNumber()})
+            ))
+            def add(self, params: dict) -> int:
+                return params["a"] + params["b"]
+        ```
+
+    Raises:
+        Exception: If the parameters fail schema validation at runtime
     """
     def decorator(func):
         @wraps(func)
-        def wrapper(*wrapper_args, **kwargs):
-            return func(*wrapper_args, **kwargs)
+        def wrapper(self, parameters: dict, *args, **kwargs):
+            if tool_params["parameters"]:
+                validated_params = tool_params["parameters"].schema.validate(parameters)
+                return func(self, validated_params, *args, **kwargs)
+            return func(self, parameters, *args, **kwargs)
 
-        # Get the class from the first argument when method is called
-        def register_tool(*args, **kwargs):
-            if not args:
-                raise ValueError("Tool decorator can only be used on class methods")
-            
-            target_class = args[0].__class__
-            
-            # Validate parameters and get metadata
-            validated = validate_method_parameters(target_class, func.__name__)
-            
-            # Create tool metadata
-            metadata = StoredToolMetadata(
-                name=params.name or snake_case(func.__name__),
-                description=params.description,
-                parameters=validated['parameters'],
-                wallet_client=validated.get('wallet_client'),
-                target=func
-            )
+        # Validate parameters
+        if not isinstance(tool_params.get("parameters", None), ToolParameters):
+            raise ValueError("Tool parameters must be a ToolParameters instance")
 
-            # Store metadata
-            if target_class not in _tool_metadata:
-                _tool_metadata[target_class] = {}
-            _tool_metadata[target_class][func.__name__] = metadata
+        execute = True
+        if not execute:
+            return wrapper
 
-            return wrapper(*args, **kwargs)
+        # Get validated parameters from method signature
+        validated_params = validate_decorator_parameters(func)
+        
+        # Store metadata on the wrapper function
+        tool_metadata = StoredToolMetadata(
+            name=tool_params.get("name", snake_case(func.__name__)),
+            description=tool_params["description"],
+            parameters=validated_params["parameters"],
+            target=func,
+            wallet_client=validated_params.get("wallet_client")
+        )
+        
+        # Store metadata directly on the wrapper function
+        setattr(wrapper, TOOL_METADATA_KEY, tool_metadata)
+        
+        return wrapper
 
-        return register_tool
     return decorator
 
-def validate_method_parameters(target: Any, method_name: str) -> dict:
+def validate_decorator_parameters(method: Callable) -> dict:
     """
     Validates the parameters of a tool method to ensure it has the correct signature.
     
     Args:
-        target: The class instance or class containing the method
-        method_name: Name of the method being decorated
+        method: The method being decorated
     
     Returns:
         Dict containing validated parameter information
     """
-    class_name = target.__class__.__name__ if hasattr(target, '__class__') else None
-    log_prefix = f"Method '{method_name}'" + (f" on class '{class_name}'" if class_name else "")
+
+    log_prefix = f"Method '{method.__name__}'"
     explainer = ("Tool methods must have at least one parameter that is a Zon schema class "
                 "created with the create_tool_parameters function.")
 
     # Get method signature
-    method = getattr(target, method_name)
     sig = inspect.signature(method)
     params = list(sig.parameters.values())
 
     if len(params) == 0:
         raise ValueError(f"{log_prefix} has no parameters. {explainer}")
-    if len(params) > 2:
+    if len(params) > 3: # we have self, params and wallet_client
         raise ValueError(f"{log_prefix} has {len(params)} parameters. {explainer}")
 
     # Find parameters that match our requirements
@@ -112,9 +127,9 @@ def validate_method_parameters(target: Any, method_name: str) -> dict:
     wallet_client_param = None
     
     for idx, param in enumerate(params):
-        if (hasattr(param.annotation, 'schema') and 
-            isinstance(param.annotation.schema, ZonRecord)):
-            parameters_param = {'index': idx, 'schema': param.annotation.schema}
+        if (isinstance(param.annotation, type) and
+            issubclass(param.annotation, dict)):
+            parameters_param = {'index': idx}
         elif (isinstance(param.annotation, type) and 
               issubclass(param.annotation, WalletClientBase)):
             wallet_client_param = {'index': idx}

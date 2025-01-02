@@ -5,7 +5,7 @@ from typing_extensions import TypeVar
 from core.classes.tool_base import ToolBase, create_tool
 from core.classes.wallet_client_base import WalletClientBase
 from core.types.chain import Chain
-from core.decorators.tool import StoredToolMetadata
+from core.decorators.tool import StoredToolMetadata, TOOL_METADATA_KEY
 
 TWalletClient = TypeVar("TWalletClient", bound=WalletClientBase)
 
@@ -52,7 +52,7 @@ class PluginBase(Generic[TWalletClient], ABC):
 
         for tool_provider in self.tool_providers:
             # Get all class attributes including the metadata
-            tool_map = getattr(tool_provider.__class__, TOOL_METADATA_KEY, None)
+            tool_map = _tool_metadata.get(tool_provider.__class__, {})
 
             if not tool_map:
                 constructor_name = tool_provider.__class__.__name__

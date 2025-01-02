@@ -14,14 +14,18 @@ class PluginBase(Generic[TWalletClient], ABC):
     Abstract base class for plugins that provide tools for wallet interactions.
     """
     
-    def __init__(self, name: str, tool_providers: List[Any]):
+    def __init__(self, name: str, tool_providers: List[object]):
         """
         Creates a new Plugin instance.
         
         Args:
             name: The name of the plugin
-            tool_providers: Array of class instances that provide tools
+            tool_providers: Array of class instances that provide tools. Must be actual instances,
+                          not classes themselves.
         """
+        if not all(isinstance(provider, object) and not isinstance(provider, type) for provider in tool_providers):
+            raise TypeError("All tool providers must be class instances, not classes themselves")
+            
         self.name = name
         self.tool_providers = tool_providers
 

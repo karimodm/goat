@@ -38,7 +38,7 @@ class PluginBase(Generic[TWalletClient], ABC):
         """
         pass
 
-    def get_tools(self, wallet_client: WalletClientBase) -> Union[List[ToolBase], Awaitable[List[ToolBase]]]:
+    def get_tools(self, wallet_client: WalletClientBase) -> List[ToolBase]:
         """
         Retrieves the tools provided by the plugin.
         

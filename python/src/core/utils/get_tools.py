@@ -16,11 +16,11 @@ async def get_tools(
 
     for plugin in plugins:
         if not plugin.supports_chain(chain):
-            chain_id = f" chain id {chain.id}" if hasattr(chain, "id") else ""
-            print(f"Warning: Plugin {plugin.name} does not support {chain.type}{chain_id}. Skipping.")
+            chain_id = f" chain id {chain['id']}" if "id" in chain else ""
+            print(f"Warning: Plugin {plugin.name} does not support {chain['type']}{chain_id}. Skipping.")
             continue
             
-        plugin_tools = await plugin.get_tools(wallet)
+        plugin_tools = plugin.get_tools(wallet)
         tools.extend(plugin_tools)
 
     return [*core_tools, *tools] 

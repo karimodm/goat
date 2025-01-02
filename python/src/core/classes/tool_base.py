@@ -72,7 +72,7 @@ def create_tool(
     class Tool(ToolBase):
         def execute(self, parameters: dict[str, Any]) -> TResult:
             # Validate parameters using the tool's schema before executing
-            validated_params = self.parameters.validate(parameters)
+            validated_params = self.parameters.strict().validate(parameters)
             return execute_fn(validated_params)
     
     return Tool(config) 

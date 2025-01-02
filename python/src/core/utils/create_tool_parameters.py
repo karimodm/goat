@@ -8,6 +8,10 @@ class ToolParameters(Generic[T]):
     schema: T
 
 def create_tool_parameters(schema: T) -> ToolParameters[T]:
+    # Check if schema is an instance of ZonRecord
+    if not isinstance(schema, ZonRecord):
+        raise ValueError(f"Schema must be an instance of ZonRecord, got {type(schema)}")
+
     return type(
         'SchemaHolder',
         (ToolParameters,),

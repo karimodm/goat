@@ -20,15 +20,15 @@ class ParameterMetadata(TypedDict):
     schema: ZonRecord
 
 class WalletClientMetadata(TypedDict):
-    index: int
+    index: int | None
 
 @dataclass 
 class StoredToolMetadata:
     name: str
     description: str
-    parameters: ParameterMetadata
     target: Callable
-    wallet_client: Optional[WalletClientMetadata] = None
+    parameters: ParameterMetadata
+    wallet_client: WalletClientMetadata
 
 TOOL_METADATA_KEY = "__goat_tool__"
 
@@ -52,10 +52,10 @@ def Tool(tool_params: ToolDecoratorParams) -> Any:
     Example:
         ```python
         class MyService:
-            @Tool(ToolDecoratorParams(
-                description="Adds two numbers",
-                schema=ZonRecord({"a": ZonNumber(), "b": ZonNumber()})
-            ))
+            @Tool({
+                "description": "Adds two numbers",
+                "parameters": create_tool_parameters({"a": ZonNumber(), "b": ZonNumber()})
+            })
             def add(self, params: dict) -> int:
                 return params["a"] + params["b"]
         ```
@@ -64,41 +64,39 @@ def Tool(tool_params: ToolDecoratorParams) -> Any:
         Exception: If the parameters fail schema validation at runtime
     """
     def decorator(func):
-        @wraps(func)
-        def wrapper(self, parameters: dict, *args, **kwargs):
-            if tool_params["parameters"]:
-                validated_params = tool_params["parameters"].schema.validate(parameters)
-                return func(self, validated_params, *args, **kwargs)
-            return func(self, parameters, *args, **kwargs)
-
         # Validate parameters
         if not isinstance(tool_params.get("parameters", None), ToolParameters):
             raise ValueError("Tool parameters must be a ToolParameters instance")
 
         execute = True
         if not execute:
-            return wrapper
+            return func
 
         # Get validated parameters from method signature
-        validated_params = validate_decorator_parameters(func)
+        parameters_indexes = validate_decorator_parameters(func)
         
-        # Store metadata on the wrapper function
+        # Store metadata on the function
         tool_metadata = StoredToolMetadata(
             name=tool_params.get("name", snake_case(func.__name__)),
             description=tool_params["description"],
-            parameters=validated_params["parameters"],
             target=func,
-            wallet_client=validated_params.get("wallet_client")
+            parameters={
+                "index": parameters_indexes["parameters"],
+                "schema": tool_params["parameters"].schema
+            },
+            wallet_client={
+                "index": parameters_indexes.get("wallet_client")
+            }
         )
         
-        # Store metadata directly on the wrapper function
-        setattr(wrapper, TOOL_METADATA_KEY, tool_metadata)
+        # Store metadata directly on the function
+        setattr(func, TOOL_METADATA_KEY, tool_metadata)
         
-        return wrapper
+        return func
 
     return decorator
 
-def validate_decorator_parameters(method: Callable) -> dict:
+def validate_decorator_parameters(method: Callable) -> dict[str, int]:
     """
     Validates the parameters of a tool method to ensure it has the correct signature.
     
@@ -123,26 +121,26 @@ def validate_decorator_parameters(method: Callable) -> dict:
         raise ValueError(f"{log_prefix} has {len(params)} parameters. {explainer}")
 
     # Find parameters that match our requirements
-    parameters_param = None
-    wallet_client_param = None
+    parameters_index = None
+    wallet_client_index = None
     
     for idx, param in enumerate(params):
         if (isinstance(param.annotation, type) and
             issubclass(param.annotation, dict)):
-            parameters_param = {'index': idx}
+            parameters_index = idx
         elif (isinstance(param.annotation, type) and 
               issubclass(param.annotation, WalletClientBase)):
-            wallet_client_param = {'index': idx}
+            wallet_client_index = idx
 
-    if not parameters_param:
+    if not parameters_index:
         raise ValueError(
             f"{log_prefix} has no parameters parameter.\n\n"
             f"1.) {explainer}\n\n"
             "2.) Ensure that you are using proper Zon schema annotations."
         )
 
-    result = {'parameters': parameters_param}
-    if wallet_client_param:
-        result['wallet_client'] = wallet_client_param
+    result = {'parameters': parameters_index}
+    if wallet_client_index:
+        result['wallet_client'] = wallet_client_index
 
     return result

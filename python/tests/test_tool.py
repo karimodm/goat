@@ -53,16 +53,6 @@ class TestToolDecorator:
         result = service.test_method_with_wallet({"value": "test"}, TestWalletClient())
         assert result == "test with wallet"
 
-    def test_schema_validation(self):
-        service = ToolService()
-        
-        # Test with invalid parameters
-        with pytest.raises(ZonError):  # Replace with specific Zon validation exception
-            service.test_method({"invalid_key": "test"})
-        
-        with pytest.raises(ZonError):  # Replace with specific Zon validation exception
-            service.test_method({"value": 123})  # Wrong type
-
     def test_tool_decorator_validation(self):
         # Test invalid method signatures
         with pytest.raises(ValueError):

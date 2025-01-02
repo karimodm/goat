@@ -68,10 +68,6 @@ def Tool(tool_params: ToolDecoratorParams) -> Any:
         if not isinstance(tool_params.get("parameters", None), ToolParameters):
             raise ValueError("Tool parameters must be a ToolParameters instance")
 
-        execute = True
-        if not execute:
-            return func
-
         # Get validated parameters from method signature
         parameters_indexes = validate_decorator_parameters(func)
         

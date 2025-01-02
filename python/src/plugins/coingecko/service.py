@@ -1,5 +1,4 @@
 import aiohttp
-from core import ToolBase
 from core.decorators.tool import Tool
 from .parameters import GetCoinPriceParameters, GetTrendingCoinsParameters, SearchCoinsParameters
 

@@ -130,3 +130,62 @@ class TestPluginBase:
                 "value": "test",
                 "extra": "should not be here"
             })
+
+    def test_async_tool(self, wallet_client):
+        """Test that async tools work correctly in plugins"""
+        # Create an async tool provider
+        class AsyncToolProvider:
+            @Tool({
+                "description": "An async tool that delays and returns a signed message",
+                "parameters": create_tool_parameters(ZonRecord({
+                    "message": ZonString(),
+                    "delay": ZonNumber()
+                }))
+            })
+            async def delayed_sign(self, params: dict, wallet: TestWalletClient) -> str:
+                import asyncio
+                await asyncio.sleep(params["delay"])
+                signed = await wallet.sign_message(params["message"])
+                return f"{signed['signature']} after {params['delay']:.1f} seconds"
+        
+        # Create plugin with async tool
+        plugin = TestPlugin("async_plugin", [AsyncToolProvider()])
+        tools = plugin.get_tools(wallet_client)
+        
+        assert len(tools) == 1
+        async_tool = tools[0]
+        
+        # Test async execution
+        import asyncio
+        
+        # Test single execution
+        result = asyncio.run(async_tool.execute({
+            "message": "hello",
+            "delay": 0.1
+        }))
+        assert result == "signed_hello after 0.1 seconds"
+        
+        # Test concurrent executions
+        async def run_concurrent_tests():
+            tasks = [
+                async_tool.execute({
+                    "message": f"msg{i}",
+                    "delay": 0.1 * (i+1)
+                })
+                for i in range(3)
+            ]
+            return await asyncio.gather(*tasks)
+        
+        results = asyncio.run(run_concurrent_tests())
+        assert results == [
+            "signed_msg0 after 0.1 seconds",
+            "signed_msg1 after 0.2 seconds",
+            "signed_msg2 after 0.3 seconds"
+        ]
+        
+        # Test parameter validation
+        with pytest.raises(Exception):
+            asyncio.run(async_tool.execute({
+                "message": 123,  # should be string
+                "delay": 0.1
+            }))

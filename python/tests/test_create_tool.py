@@ -87,5 +87,30 @@ def test_create_tool_async():
     assert tool.description == "A test tool that returns after a delay"
     assert tool.parameters == parameters
     
-    # Note: Testing async execution would require running in an async context
-    # This is just testing the tool creation for async functions 
+    # Test async execution
+    import asyncio
+    
+    # Test with valid parameters
+    result = asyncio.run(tool.execute({"delay": 0.1}))
+    assert result == "Completed after 0.1 seconds"
+    
+    # Test with multiple concurrent executions
+    async def run_concurrent_tests():
+        tasks = [
+            tool.execute({"delay": 0.1}),
+            tool.execute({"delay": 0.2}),
+            tool.execute({"delay": 0.3})
+        ]
+        results = await asyncio.gather(*tasks)
+        return results
+    
+    results = asyncio.run(run_concurrent_tests())
+    assert results == [
+        "Completed after 0.1 seconds",
+        "Completed after 0.2 seconds",
+        "Completed after 0.3 seconds"
+    ]
+    
+    # Test parameter validation still works
+    with pytest.raises(ZonError):
+        asyncio.run(tool.execute({"delay": "invalid"})) 

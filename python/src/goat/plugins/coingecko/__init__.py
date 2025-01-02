@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from core import PluginBase
+from goat.core import PluginBase
 from .service import CoinGeckoService
 
 @dataclass

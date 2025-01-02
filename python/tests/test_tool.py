@@ -1,11 +1,10 @@
-from core.types.chain import Chain, EvmChain
+from typing import Any
 import pytest
-from dataclasses import dataclass
-from core.decorators.tool import Tool, ToolDecoratorParams
-from core.classes.wallet_client_base import Signature, Balance, WalletClientBase
-from zon import ZonRecord, ZonString, ZonError
-from core.utils.create_tool_parameters import create_tool_parameters, ToolParameters
-from typing import TypedDict, Any, Dict, Type, cast
+from goat.core.decorators.tool import Tool
+from goat.core.classes.wallet_client_base import Signature, Balance, WalletClientBase
+from goat.core.types.chain import Chain, EvmChain
+from zon import ZonRecord, ZonString
+from goat.core.utils.create_tool_parameters import create_tool_parameters
 
 # Create test schemas and classes
 test_schema = ZonRecord({
@@ -57,7 +56,7 @@ class TestToolDecorator:
         # Test invalid method signatures
         with pytest.raises(ValueError):
             class InvalidService:
-                @Tool({
+                @Tool({ # type: ignore
                     "description": "Invalid tool",
                 })
                 def no_params(self):
@@ -67,7 +66,7 @@ class TestToolDecorator:
             class InvalidService2:
                 @Tool({
                     "description": "Invalid tool",
-                    "parameters": test_schema
+                    "parameters": test_schema # type: ignore
                 })
                 def too_many_params(self, param1: Any, param2: TestWalletClient, param3: str):
                     pass 

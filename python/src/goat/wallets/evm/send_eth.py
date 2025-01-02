@@ -3,10 +3,10 @@ from typing import Dict, List, cast
 
 from zon import ZonRecord, ZonString
 
-from core.classes.plugin_base import PluginBase
-from core.classes.tool_base import ToolBase, create_tool
-from core.utils.create_tool_parameters import create_tool_parameters
-from core.types.chain import Chain
+from goat.core.classes.plugin_base import PluginBase
+from goat.core.classes.tool_base import ToolBase, create_tool
+from goat.core.utils.create_tool_parameters import create_tool_parameters
+from goat.core.types.chain import Chain
 
 from .evm_smart_wallet_client import EVMWalletClient
 

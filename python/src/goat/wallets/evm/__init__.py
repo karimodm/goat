@@ -1,10 +1,10 @@
-from wallets.evm.types import (
+from .types import (
     EVMTransaction, EVMReadRequest, EVMReadResult, EVMTypedData,
     PaymasterOptions, EVMTransactionOptions, TypedDataDomain
 )
-from wallets.evm.evm_wallet_client import EVMWalletClient
-from wallets.evm.evm_smart_wallet_client import EVMSmartWalletClient
-from wallets.evm.send_eth import SendETHPlugin, send_eth
+from .evm_wallet_client import EVMWalletClient
+from .evm_smart_wallet_client import EVMSmartWalletClient
+from .send_eth import SendETHPlugin, send_eth
 
 __all__ = [
     "EVMTransaction",

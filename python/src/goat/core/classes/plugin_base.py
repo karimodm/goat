@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 from typing import List, Any, Union, Awaitable, TypeVar, Generic
 from typing_extensions import TypeVar
 
-from core.classes.tool_base import ToolBase, create_tool
-from core.classes.wallet_client_base import WalletClientBase
-from core.types.chain import Chain
-from core.decorators.tool import StoredToolMetadata, TOOL_METADATA_KEY
+from goat.core.classes.tool_base import ToolBase, create_tool
+from goat.core.classes.wallet_client_base import WalletClientBase
+from goat.core.types.chain import Chain
+from goat.core.decorators.tool import StoredToolMetadata, TOOL_METADATA_KEY
 
 TWalletClient = TypeVar("TWalletClient", bound=WalletClientBase)
 

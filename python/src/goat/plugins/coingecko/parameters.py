@@ -1,5 +1,5 @@
 from zon import ZonRecord, ZonString, ZonNumber, ZonBoolean, ZonOptional
-from core.utils.create_tool_parameters import create_tool_parameters
+from goat.core.utils.create_tool_parameters import create_tool_parameters
 
 # Create fields for GetTrendingCoinsParameters
 limit_param = ZonOptional(ZonNumber())

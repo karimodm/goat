@@ -8,13 +8,16 @@ keywords = ["goat", "sdk", "web3", "agents", "ai"]
 homepage = "https://ohmygoat.dev/"
 repository = "https://github.com/goat-sdk/goat"
 packages = [
-    { include = "core", from = "src" },
+    { include = "goat", from = "src" },
+    { include = "goat/plugins/coingecko", from = "src" },
+    { include = "goat/wallets/evm", from = "src" },
 ]
 
 [tool.poetry.dependencies]
 python = "^3.12"
 zon = "^2.0.1"
 pydantic = "^2.10.0"
+aiohttp = "^3.8.6"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"

@@ -1,5 +1,5 @@
 import aiohttp
-from core.decorators.tool import Tool
+from goat.core.decorators.tool import Tool
 from .parameters import GetCoinPriceParameters, GetTrendingCoinsParameters, SearchCoinsParameters
 
 class CoinGeckoService:

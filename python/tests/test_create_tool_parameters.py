@@ -1,7 +1,6 @@
-from core.utils.add_parameters_to_description import add_parameters_to_description
 import pytest
 from zon import ZonRecord, ZonString, ZonError
-from core.utils.create_tool_parameters import create_tool_parameters
+from goat.core.utils.create_tool_parameters import create_tool_parameters
 
 def test_create_token_parameters():
     # Test GetTokenInfoBySymbol

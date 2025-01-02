@@ -1,14 +1,11 @@
 from dataclasses import dataclass
-from functools import wraps
-from pyclbr import Class
-from typing import Any, Dict, Optional, Type, Callable, NotRequired, ClassVar
+from typing import Any, Callable, NotRequired, TypedDict
 import inspect
-from core.utils.create_tool_parameters import ToolParameters
-from typing_extensions import TypedDict
 from zon import ZonRecord
+from goat.core.utils.create_tool_parameters import ToolParameters
 
-from core.classes.wallet_client_base import WalletClientBase
-from core.utils.snake_case import snake_case
+from goat.core.classes.wallet_client_base import WalletClientBase
+from goat.core.utils.snake_case import snake_case
 
 class ToolDecoratorParams(TypedDict):
     name: NotRequired[str]

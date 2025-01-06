@@ -2,7 +2,7 @@
 name = "goat-sdk-adapter-langchain"
 version = "0.1.0"
 description = "Goat adapter for LangChain"
-authors = ["Agustin Armellini Fischer <armellini13@gmail.com>"]
+authors = ["Andrea Villa <andreakarimodm@gmail.com>"]
 readme = "README.md"
 keywords = ["goat", "sdk", "web3", "agents", "ai"]
 homepage = "https://ohmygoat.dev/"

@@ -34,11 +34,11 @@ class WalletClientBase(ABC):
         pass
 
     @abstractmethod
-    async def sign_message(self, message: str) -> Signature:
+    def sign_message(self, message: str) -> Signature:
         pass
 
     @abstractmethod
-    async def balance_of(self, address: str) -> Balance:
+    def balance_of(self, address: str) -> Balance:
         pass
 
     def get_core_tools(self) -> List[ToolBase]:

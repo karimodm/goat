@@ -26,7 +26,7 @@ class EVMReadRequest(TypedDict):
 
 
 class EVMReadResult(TypedDict):
-    result: Any
+    value: Any
 
 
 class TypedDataDomain(TypedDict):

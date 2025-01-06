@@ -1,10 +1,10 @@
 from typing import Any
 import pytest
-from goat.core.decorators.tool import Tool
-from goat.core.classes.wallet_client_base import Signature, Balance, WalletClientBase
-from goat.core.types.chain import Chain, EvmChain
+from core.core.decorators.tool import Tool
+from core.core.classes.wallet_client_base import Signature, Balance, WalletClientBase
+from core.core.types.chain import Chain, EvmChain
 from zon import ZonRecord, ZonString
-from goat.core.utils.create_tool_parameters import create_tool_parameters
+from core.core.utils.create_tool_parameters import create_tool_parameters
 
 # Create test schemas and classes
 test_schema = ZonRecord({

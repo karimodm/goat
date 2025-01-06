@@ -2,10 +2,10 @@ from dataclasses import dataclass
 from typing import Any, Callable, NotRequired, TypedDict
 import inspect
 from zon import ZonRecord
-from goat.core.utils.create_tool_parameters import ToolParameters
 
-from goat.core.classes.wallet_client_base import WalletClientBase
-from goat.core.utils.snake_case import snake_case
+from goat.utils.create_tool_parameters import ToolParameters
+from goat.classes.wallet_client_base import WalletClientBase
+from goat.utils.snake_case import snake_case
 
 class ToolDecoratorParams(TypedDict):
     name: NotRequired[str]

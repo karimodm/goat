@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from typing import Dict
 
-from goat.core.types.chain import EvmChain
-from goat.core.classes.wallet_client_base import WalletClientBase
+from goat.types.chain import EvmChain
+from goat.classes.wallet_client_base import WalletClientBase
 
 from .types import EVMTransaction, EVMReadRequest, EVMReadResult, EVMTypedData
 

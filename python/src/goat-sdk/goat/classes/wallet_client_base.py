@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 from typing import List, TypedDict
 from zon import ZonRecord, ZonString
 
-from goat.core.classes.tool_base import ToolBase, create_tool
-from goat.core.types.chain import Chain
-from goat.core.utils.create_tool_parameters import create_tool_parameters
+from goat.classes.tool_base import ToolBase, create_tool
+from goat.types.chain import Chain
+from goat.utils.create_tool_parameters import create_tool_parameters
 
 EmptyParams = create_tool_parameters(ZonRecord({}))
 BalanceParams = create_tool_parameters(ZonRecord({

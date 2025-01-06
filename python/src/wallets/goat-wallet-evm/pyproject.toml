@@ -1,17 +1,19 @@
 [tool.poetry]
-name = "goat-sdk-monorepo"
-version = "0.0.1"
-description = "Goat 🐐 (Great Onchain Agent Toolkit) is an open-source framework for connecting AI agents to any onchain app"
+name = "goat-sdk-wallet-evm"
+version = "0.1.0"
+description = "Goat SDK EVM wallet implementation"
 authors = ["Agustin Armellini Fischer <armellini13@gmail.com>"]
 readme = "README.md"
-keywords = ["goat", "sdk", "web3", "agents", "ai"]
+keywords = ["goat", "sdk", "web3", "agents", "ai", "evm", "wallet"]
 homepage = "https://ohmygoat.dev/"
 repository = "https://github.com/goat-sdk/goat"
+packages = [
+    { include = "goat_wallets/evm" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-zon = "^2.0.1"
-pydantic = "^2.10.0"
+goat-sdk = "^0.1.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
@@ -33,9 +35,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.8.6"
-goat-core = { path = "src/goat/core/", develop = true }
-goat-plugin-coingecko = { path = "src/goat/plugins/coingecko/", develop = true }
-goat-plugin-erc20 = { path = "src/goat/plugins/erc20/", develop = true }
+goat-sdk = { path = "../../goat-sdk", develop = true }
 
 [tool.ruff]
 line-length = 120

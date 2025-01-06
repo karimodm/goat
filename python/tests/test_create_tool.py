@@ -1,6 +1,6 @@
 import pytest
 from zon import ZonRecord, ZonString, ZonNumber, ZonError
-from goat.core.classes.tool_base import create_tool, ToolConfig
+from core.core.classes.tool_base import create_tool, ToolConfig
 
 def test_create_tool():
     # Create a simple parameter schema

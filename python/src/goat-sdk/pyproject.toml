@@ -1,12 +1,15 @@
 [tool.poetry]
-name = "goat-sdk-monorepo"
-version = "0.0.1"
+name = "goat-sdk"
+version = "0.1.0"
 description = "Goat 🐐 (Great Onchain Agent Toolkit) is an open-source framework for connecting AI agents to any onchain app"
 authors = ["Agustin Armellini Fischer <armellini13@gmail.com>"]
 readme = "README.md"
 keywords = ["goat", "sdk", "web3", "agents", "ai"]
 homepage = "https://ohmygoat.dev/"
 repository = "https://github.com/goat-sdk/goat"
+packages = [
+    { include = "goat" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -33,9 +36,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.8.6"
-goat-core = { path = "src/goat/core/", develop = true }
-goat-plugin-coingecko = { path = "src/goat/plugins/coingecko/", develop = true }
-goat-plugin-erc20 = { path = "src/goat/plugins/erc20/", develop = true }
 
 [tool.ruff]
 line-length = 120

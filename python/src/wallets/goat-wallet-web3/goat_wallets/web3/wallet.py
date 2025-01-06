@@ -133,6 +133,7 @@ class Web3EVMWalletClient(EVMWalletClient):
 
         # Send the transaction
         tx_hash = contract_function(*args).transact(tx_params)
+
         return self._wait_for_receipt(HexStr(tx_hash.to_0x_hex()))
 
     def read(self, request: EVMReadRequest) -> EVMReadResult:
